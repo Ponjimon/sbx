@@ -1,21 +1,27 @@
-schemaVersion: "2"
+# syntax=docker/sandbox-kit:3
+schemaVersion: "3"
+displayName: Claude settings
+author: Ponjimon
+description: Managed Claude Code settings for sandboxes
+version: "1.0.0"
+
 kind: mixin
-name: claude-settings
 
-requires:
-  agent: claude
+requires: [claude]
 
-setup:
-  install:
-    - command: |
-        set -eu
+capabilities:
+  - type: com.docker.sandbox/lifecycle@1
+    config:
+      install:
+        - description: Configure Claude Code
+          user: "0"
+          command: |
+            set -eu
 
-        mkdir -p /etc/claude-code/managed-settings.d
+            mkdir -p /etc/claude-code/managed-settings.d
 
-        cat > /etc/claude-code/managed-settings.d/50-sbx-settings.json <<'JSON'
-        {
-          "respondToBashCommands": false
-        }
-        JSON
-      user: "0"
-      description: Configure Claude Code
+            cat > /etc/claude-code/managed-settings.d/50-sbx-settings.json <<'JSON'
+            {
+              "respondToBashCommands": false
+            }
+            JSON
