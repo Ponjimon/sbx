@@ -1,0 +1,26 @@
+schemaVersion: "2"
+kind: mixin
+name: bun
+
+setup:
+  install:
+    - command: |
+        set -eu
+
+        export BUN_INSTALL=/usr/local/lib/bun
+
+        curl -fsSL https://bun.com/install | bash
+
+        ln -sf "$BUN_INSTALL/bin/bun" /usr/local/bin/bun
+        ln -sf "$BUN_INSTALL/bin/bunx" /usr/local/bin/bunx
+
+        bun --version
+        bunx --version
+      user: "0"
+      description: Install latest Bun
+
+permissions:
+  network:
+    allow:
+      - bun.com
+      - github.com
