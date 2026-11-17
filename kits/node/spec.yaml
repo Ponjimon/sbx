@@ -1,11 +1,15 @@
 # syntax=docker/sandbox-kit:3
 schemaVersion: "3"
 displayName: Node.js
+author: Ponjimon
 description: Node.js installed with n; version selected with the node_version arg
 sourceUrl: https://github.com/tj/n
 licenses: [MIT]
+version: "1.0.0"
 
 kind: mixin
+
+provides: [nodejs]
 
 args:
   node_version:
@@ -13,7 +17,6 @@ args:
     pattern: '^[0-9]+(\.[0-9]+){0,2}$'
     description: Node.js major ("24") or exact version ("24.22.2")
 
-provides: [nodejs]
 
 capabilities:
   - type: com.docker.sandbox/network-policy@1
