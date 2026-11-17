@@ -20,12 +20,12 @@ args:
 
 capabilities:
   - type: com.docker.sandbox/network-policy@1
-    description: Download Node.js and install n from npm
+    description: Download the n script from GitHub and Node.js from nodejs.org
     config:
       install:
         allow:
+          - raw.githubusercontent.com
           - nodejs.org
-          - registry.npmjs.org
 
   - type: com.docker.sandbox/lifecycle@1
     config:
@@ -38,8 +38,11 @@ capabilities:
             export N_PREFIX=/usr/local
             export PATH="/usr/local/bin:$PATH"
 
-            npm install --global --prefix /usr/local n
-            /usr/local/bin/n ${{ kit.args.node_version }}
+            # bootstrap n without npm (the base image has no Node/npm)
+            curl -fsSL -o /usr/local/bin/n https://raw.githubusercontent.com/tj/n/v10.2.0/bin/n
+            chmod 0755 /usr/local/bin/n
+
+            n install ${{ kit.args.node_version }}
 
             hash -r
 
