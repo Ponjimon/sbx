@@ -10,7 +10,7 @@ kind: mixin
 provides:
   - "cfn-lint@${{ kit.args.cfnLintVersion }}"
   - "cfn-nag@${{ kit.args.cfnNagVersion }}"
-  
+
 args:
   cfnLintVersion:
     default: "1.60.0"
@@ -26,6 +26,7 @@ args:
 
 capabilities:
   - type: com.docker.sandbox/network-policy@1
+    description: Install Python/Ruby from the distro mirrors, cfn-lint from PyPI and cfn-nag from RubyGems
     config:
       install:
         allow:
@@ -33,3 +34,41 @@ capabilities:
           - "*.rubygems.org"
           - pypi.org
           - files.pythonhosted.org
+          # distro package mirrors, only used if python3/ruby are missing
+          - deb.debian.org
+          - security.debian.org
+          - archive.ubuntu.com
+          - security.ubuntu.com
+          - ports.ubuntu.com
+
+  - type: com.docker.sandbox/lifecycle@1
+    config:
+      install:
+        - description: Install cfn-lint ${{ kit.args.cfnLintVersion }} and cfn-nag ${{ kit.args.cfnNagVersion }}
+          user: "0"
+          command: |
+            set -eu
+
+            export DEBIAN_FRONTEND=noninteractive
+
+            # Runtimes: only pull from apt if the base image lacks them
+            pkgs=""
+            command -v python3 >/dev/null 2>&1 || pkgs="$pkgs python3"
+            python3 -c 'import venv, ensurepip' >/dev/null 2>&1 || pkgs="$pkgs python3-venv"
+            command -v gem >/dev/null 2>&1 || pkgs="$pkgs ruby"
+            if [ -n "$pkgs" ]; then
+              apt-get update
+              apt-get install -y --no-install-recommends $pkgs
+              rm -rf /var/lib/apt/lists/*
+            fi
+
+            # cfn-lint in its own venv (avoids PEP 668 "externally managed" errors)
+            python3 -m venv /opt/cfn-lint
+            /opt/cfn-lint/bin/pip install --no-cache-dir "cfn-lint==${{ kit.args.cfnLintVersion }}"
+            ln -sf /opt/cfn-lint/bin/cfn-lint /usr/local/bin/cfn-lint
+
+            # cfn-nag, binaries into /usr/local/bin so they are on every user's PATH
+            gem install cfn-nag -v "${{ kit.args.cfnNagVersion }}" --no-document --bindir /usr/local/bin
+
+            cfn-lint --version
+            cfn_nag_scan --version
