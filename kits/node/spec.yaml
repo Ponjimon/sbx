@@ -1,28 +1,49 @@
-schemaVersion: "2"
+# syntax=docker/sandbox-kit:3
+schemaVersion: "3"
+displayName: Node.js
+description: Node.js installed with n; version selected with the node_version arg
+sourceUrl: https://github.com/tj/n
+licenses: [MIT]
+
 kind: mixin
-name: nodejs
 
-setup:
-  install:
-    - command: |
-        set -eu
+args:
+  node_version:
+    default: "24"
+    pattern: '^[0-9]+(\.[0-9]+){0,2}$'
+    description: Node.js major ("24") or exact version ("24.22.2")
 
-        export N_PREFIX=/usr/local
-        export PATH="/usr/local/bin:$PATH"
+provides: [nodejs]
 
-        npm install --global --prefix /usr/local n
-        /usr/local/bin/n 24
+capabilities:
+  - type: com.docker.sandbox/network-policy@1
+    description: Download Node.js and install n from npm
+    config:
+      install:
+        allow:
+          - nodejs.org
+          - registry.npmjs.org
 
-        hash -r
+  - type: com.docker.sandbox/lifecycle@1
+    config:
+      install:
+        - description: Install Node.js ${{ kit.args.node_version }} with n
+          user: "0"
+          command: |
+            set -eu
 
-        node --version
-        npm --version
-        test "$(node -p 'process.versions.node.split(".")[0]')" = "24"
-      user: "0"
-      description: Install latest Node.js 24
+            export N_PREFIX=/usr/local
+            export PATH="/usr/local/bin:$PATH"
 
-permissions:
-  network:
-    allow:
-      - nodejs.org
-      - registry.npmjs.org
+            npm install --global --prefix /usr/local n
+            /usr/local/bin/n ${{ kit.args.node_version }}
+
+            hash -r
+
+            node --version
+            npm --version
+
+            case "$(node -p 'process.versions.node')" in
+              ${{ kit.args.node_version }}|${{ kit.args.node_version }}.*) ;;
+              *) echo "expected Node ${{ kit.args.node_version }}" >&2; exit 1 ;;
+            esac
