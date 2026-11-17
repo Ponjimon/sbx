@@ -1,0 +1,28 @@
+schemaVersion: "2"
+kind: mixin
+name: nodejs
+
+setup:
+  install:
+    - command: |
+        set -eu
+
+        export N_PREFIX=/usr/local
+        export PATH="/usr/local/bin:$PATH"
+
+        npm install --global --prefix /usr/local n
+        /usr/local/bin/n 24
+
+        hash -r
+
+        node --version
+        npm --version
+        test "$(node -p 'process.versions.node.split(".")[0]')" = "24"
+      user: "0"
+      description: Install latest Node.js 24
+
+permissions:
+  network:
+    allow:
+      - nodejs.org
+      - registry.npmjs.org
