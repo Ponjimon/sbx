@@ -44,8 +44,8 @@ capabilities:
               curl -fsSL https://bun.com/install | bash -s "bun-v${{ kit.args.bun_version }}"
             fi
 
+            # the installer only ships `bun`; `bunx` is the same binary under another name
             ln -sf "$BUN_INSTALL/bin/bun" /usr/local/bin/bun
-            ln -sf "$BUN_INSTALL/bin/bunx" /usr/local/bin/bunx
+            ln -sf "$BUN_INSTALL/bin/bun" /usr/local/bin/bunx
 
             bun --version
-            bunx --version
