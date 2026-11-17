@@ -26,7 +26,7 @@ args:
 
 capabilities:
   - type: com.docker.sandbox/network-policy@1
-    description: Install Python/Ruby from the distro mirrors, cfn-lint from PyPI and cfn-nag from RubyGems
+    description: Install build deps from the distro mirrors, cfn-lint from PyPI and cfn-nag from RubyGems
     config:
       install:
         allow:
@@ -34,7 +34,6 @@ capabilities:
           - "*.rubygems.org"
           - pypi.org
           - files.pythonhosted.org
-          # distro package mirrors, only used if python3/ruby are missing
           - deb.debian.org
           - security.debian.org
           - archive.ubuntu.com
@@ -51,16 +50,12 @@ capabilities:
 
             export DEBIAN_FRONTEND=noninteractive
 
-            # Runtimes: only pull from apt if the base image lacks them
-            pkgs=""
-            command -v python3 >/dev/null 2>&1 || pkgs="$pkgs python3"
-            python3 -c 'import venv, ensurepip' >/dev/null 2>&1 || pkgs="$pkgs python3-venv"
-            command -v gem >/dev/null 2>&1 || pkgs="$pkgs ruby"
-            if [ -n "$pkgs" ]; then
-              apt-get update
-              apt-get install -y --no-install-recommends $pkgs
-              rm -rf /var/lib/apt/lists/*
-            fi
+            # python3 + venv for cfn-lint; ruby + headers + compiler for cfn-nag's native gems (psych)
+            apt-get update
+            apt-get install -y --no-install-recommends \
+              python3 python3-venv \
+              ruby ruby-dev libyaml-dev build-essential
+            rm -rf /var/lib/apt/lists/*
 
             # cfn-lint in its own venv (avoids PEP 668 "externally managed" errors)
             python3 -m venv /opt/cfn-lint
