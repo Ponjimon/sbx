@@ -1,0 +1,29 @@
+schemaVersion: "2"
+kind: mixin
+name: cfn-tools
+displayName: CloudFormation tools (cfn-lint + cfn-nag)
+description: >
+  cfn-lint and Ruby with the cfn-nag gem (cfn_nag_scan) for the CloudFormation
+  gates (lefthook, plan verification). .devcontainer/setup.sh installs the same.
+  Temporary, local to intellion-infra.
+
+permissions:
+  network:
+    allow:
+      - rubygems.org
+      - "*.rubygems.org"
+      - pypi.org
+      - files.pythonhosted.org
+
+setup:
+  install:
+    - description: Install Ruby and Python venv support (Ubuntu packages)
+      command: "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ruby ruby-dev build-essential python3-venv"
+      user: "0"
+    - description: Install cfn-nag (provides cfn_nag_scan)
+      command: "gem install --no-document cfn-nag -v 0.8.10"
+      user: "0"
+    # The system pip is externally managed (PEP 668), so cfn-lint gets its own venv.
+    - description: Install cfn-lint (provides cfn-lint)
+      command: "python3 -m venv /opt/cfn-lint && /opt/cfn-lint/bin/pip install --no-cache-dir cfn-lint==1.60.0 && ln -sf /opt/cfn-lint/bin/cfn-lint /usr/local/bin/cfn-lint"
+      user: "0"
