@@ -1,11 +1,15 @@
 # syntax=docker/sandbox-kit:3
 schemaVersion: "3"
 displayName: Bun
+author: Ponjimon
 description: Bun from the official installer; version selected with the bun_version arg
 sourceUrl: https://github.com/oven-sh/bun
 licenses: [MIT]
+version: "1.0.0"
 
 kind: mixin
+
+provides: [bun]
 
 args:
   bun_version:
@@ -13,17 +17,16 @@ args:
     pattern: '^(latest|[0-9]+\.[0-9]+\.[0-9]+)$'
     description: "'latest' or an exact version such as 1.3.13"
 
-provides: [bun]
 
 capabilities:
-  - type: com.docker.sandbox/network-policy@1
+  - type: com.docker.sandbox/network-policy@1t
     description: Download Bun from the installer and its GitHub release
     config:
       install:
         allow:
           - bun.com
           - github.com
-          - objects.githubusercontent.com   # release-asset redirect; not in v2, verify
+          - objects.githubusercontent.com
 
   - type: com.docker.sandbox/lifecycle@1
     config:
