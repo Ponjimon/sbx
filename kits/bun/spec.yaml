@@ -19,7 +19,7 @@ args:
 
 
 capabilities:
-  - type: com.docker.sandbox/network-policy@1t
+  - type: com.docker.sandbox/network-policy@1
     description: Download Bun from the installer and its GitHub release
     config:
       install:
