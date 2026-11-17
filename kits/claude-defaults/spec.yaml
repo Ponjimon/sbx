@@ -1,0 +1,21 @@
+schemaVersion: "2"
+kind: mixin
+name: claude-settings
+
+requires:
+  agent: claude
+
+setup:
+  install:
+    - command: |
+        set -eu
+
+        mkdir -p /etc/claude-code/managed-settings.d
+
+        cat > /etc/claude-code/managed-settings.d/50-sbx-settings.json <<'JSON'
+        {
+          "respondToBashCommands": false
+        }
+        JSON
+      user: "0"
+      description: Configure Claude Code
