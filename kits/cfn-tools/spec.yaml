@@ -1,10 +1,16 @@
 # syntax=docker/sandbox-kit:3
 schemaVersion: "3"
 displayName: CloudFormation tools (cfn-lint + cfn-nag)
+author: Ponjimon
 description: cfn-lint and cfn-nag for the CloudFormation gates.
-kind: mixin
 version: "1.0.0"
 
+kind: mixin
+
+provides:
+  - "cfn-lint@${{ kit.args.cfnLintVersion }}"
+  - "cfn-nag@${{ kit.args.cfnNagVersion }}"
+  
 args:
   cfnLintVersion:
     default: "1.60.0"
@@ -17,9 +23,6 @@ args:
     description: cfn-nag gem version to install
     buildArg: CFN_NAG_VERSION
 
-provides:
-  - "cfn-lint@${{ kit.args.cfnLintVersion }}"
-  - "cfn-nag@${{ kit.args.cfnNagVersion }}"
 
 capabilities:
   - type: com.docker.sandbox/network-policy@1
